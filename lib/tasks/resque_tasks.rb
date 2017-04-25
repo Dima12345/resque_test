@@ -1,13 +1,18 @@
-# require 'resque/tasks'
-# require 'resque/scheduler/tasks'
+require 'resque/tasks'  
+require 'resque/scheduler/tasks'
+# require 'resque_scheduler/tasks'
 
-# desc 'pool_setup'
-# task 'resque:pool:setup' do
-#   require 'resque-scheduler'
-#   require 'resque/pool'
-#   ActiveRecord::Base.connection.disconnect!
-#   # and re-open them in the resque worker parent
-#   Resque::Pool.after_prefork do |job|
-#     ActiveRecord::Base.establish_connection
-#   end
-# end
+task "resque:setup" => :environment  
+
+namespace :resque do
+ desc 'setup'
+ task :setup do
+    require 'resque'
+    # require 'resque_scheduler'
+    require 'resque/scheduler'      
+
+    Resque.redis = '127.0.0.1:6379'
+
+    Resque.schedule = YAML.load_file("#{Rails.root}/config/resque_schedule.yml")
+ end
+end
